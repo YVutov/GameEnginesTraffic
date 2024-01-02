@@ -69,7 +69,8 @@ public class TrafficController : MonoBehaviour
         #region VehicleCollision
 
         Vector3 target = new();
-        
+
+        //TODO check single vehicle at the end that's the highest priority. Closest/Most easily hit.
         foreach (Npc npc in _vehicles)
         {
             float distance = Vector3.Distance(npc.transform.position, vehicleTransform.position);
@@ -79,15 +80,18 @@ public class TrafficController : MonoBehaviour
                 //-180 to 180
                 float signedAngle = Vector3.SignedAngle(vehicleTransformForward, npc.transform.forward, vehicleTransform.right);
 
-                target += vehicleTransformForward * (vehicle.Speed / distance) +
-                         vehicleTransformRight; //TODO multiplication with signedAngle
+                target += vehicleTransformForward * (distance / vehicle.Speed) +
+                         vehicleTransformRight * Mathf.Cos(signedAngle); //TODO multiplication with signedAngle
             }
         }
         
-        Debug.DrawRay(target, vehicleTransform.up * 10, Color.black);
+        Debug.DrawRay(vehicleFrontCenter + target, vehicleTransform.up * 10, Color.green);
         
         #endregion
+
+        Vector3 calcDirection = vehicleFrontCenter + scanAverage + target;
+        Debug.DrawRay(calcDirection, vehicleTransform.up * 10, Color.red);
         
-        return vehicleFrontCenter + scanAverage;
+        return calcDirection; //TODO Harder road limit, right side of road bias (likely done on the TerrainMap side).
     }
 }
